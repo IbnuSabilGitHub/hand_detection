@@ -48,27 +48,27 @@ while webcam.isOpened(): # memerika apakah webcam terbuka
         if len(results.multi_hand_landmarks) == 2:
             print("Dua tangan terdeteksi.")
         for handLms, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):  # Loop melalui setiap tangan yang terdeteksi.
-            mpDraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS)  # Menggambar landmark tangan pada gambar.
-
-            # Dapatkan dimensi gambar
-            h, w, c = img.shape
-
-            hand_orientation = handedness.classification[0].label
-
-            data = "" # variabel unutk meyimpan data yang akan di kirim ke serial
             
-            # Periksa apakah tangan dalam pose "FUCK"
-            if Function.is_fuck(handLms, h):
+            mpDraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS) # Menggambar landmark tangan pada gambar.
+            height, width, c = img.shape # Dapatkan dimensi gambar
+            hand_orientation = handedness.classification[0].label # menentukan origentai gambar
+            hand_pose = Function.hands(handLms, width , height, hand_orientation) #objek dari kelas Mahasiswa
+            data = "" # variabel unutk meyimpan data yang akan di kirim ke serial
+
+            # Periksa apakah tangan dalam pose "OK"
+            if hand_pose.is_ok():
+                cv2.putText(img, 'OK', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (3, 252, 23), 3) # Menambahkan teks "FUCK" ke gambar.
+                # data = "OK\n"
+                # ser.write(data.encode('utf-8'))
+
+            # Jika tidak periksa apakah tangan dalam pose "FUCK"
+            elif hand_pose.is_fuck():
                 cv2.putText(img, 'FUCK', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 3)  # Menambahkan teks "FUCK" ke gambar.
                 # data = "FUCK\n" # isi data sesuai kondisi tangan
                 # ser.write(data.encode('utf-8')) # kirim data ke serial
 
-            # Jika tidak periksa apakah tangan dalam pose "OK"
-            elif Function.is_ok(handLms,w,h):
-                cv2.putText(img, 'OK', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (3, 252, 23), 3) # Menambahkan teks "FUCK" ke gambar.
-                # data = "OK\n"
-                # ser.write(data.encode('utf-8'))
-            elif Function.is_thumb(handLms, w, h, hand_orientation):
+            # Jika tidak periksa apakah tangan dalam pose "THUMB UP"
+            elif hand_pose.is_thumb_up():
                 cv2.putText(img, 'THUMB UP', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 3)  # Menambahkan teks "FUCK" ke gambar.
                 # data = "THUMN UP\n" # isi data sesuai kondisi tangan
                 # ser.write(data.encode('utf-8')) # kirim data ke seria
