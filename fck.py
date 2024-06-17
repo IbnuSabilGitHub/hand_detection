@@ -1,7 +1,7 @@
 import cv2
 import mediapipe as mp
 import time
-# import serial
+import serial
 
 import Function
 
@@ -22,14 +22,14 @@ mpDraw = mp.solutions.drawing_utils
 pTime = 0
 cTime = 0
 
-# try:
-#     ser = serial.Serial('COM4', 9600, timeout=1)
-#     if ser.is_open:
-#         print(f"Koneksi serial ke {ser.name} berhasil dibuka.")
-#     else:
-#         print(f"Gagal membuka koneksi serial ke {ser.name}.")
-# except serial.SerialException as e:
-#     print(f"SerialException: {e}")
+try:
+    ser = serial.Serial('COM4', 9600, timeout=1)
+    if ser.is_open:
+        print(f"Koneksi serial ke {ser.name} berhasil dibuka.")
+    else:
+        print(f"Gagal membuka koneksi serial ke {ser.name}.")
+except serial.SerialException as e:
+    print(f"SerialException: {e}")
 
 
 
@@ -45,8 +45,6 @@ while webcam.isOpened(): # memerika apakah webcam terbuka
     results = hands.process(imgRGB)  # Memproses gambar untuk mendeteksi tangan.
     
     if results.multi_hand_landmarks:  # Memeriksa apakah ada tangan yang terdeteksi.
-        if len(results.multi_hand_landmarks) == 2:
-            print("Dua tangan terdeteksi.")
         for handLms, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):  # Loop melalui setiap tangan yang terdeteksi.
             
             mpDraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS) # Menggambar landmark tangan pada gambar.
@@ -58,30 +56,40 @@ while webcam.isOpened(): # memerika apakah webcam terbuka
             # Periksa apakah tangan dalam pose "OK"
             if hand_pose.is_ok():
                 cv2.putText(img, 'OK', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (3, 252, 23), 3) # Menambahkan teks "FUCK" ke gambar.
-                # data = "OK\n"
-                # ser.write(data.encode('utf-8'))
+                data = "OK\n"
+                ser.write(data.encode('utf-8'))
 
             # Jika tidak periksa apakah tangan dalam pose "FUCK"
             elif hand_pose.is_fuck():
                 cv2.putText(img, 'FUCK', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 3)  # Menambahkan teks "FUCK" ke gambar.
-                # data = "FUCK\n" # isi data sesuai kondisi tangan
-                # ser.write(data.encode('utf-8')) # kirim data ke serial
+                data = "FUCK\n" # isi data sesuai kondisi tangan
+                ser.write(data.encode('utf-8')) # kirim data ke serial
 
             # Jika tidak periksa apakah tangan dalam pose "THUMB UP"
             elif hand_pose.is_thumb_up():
-                cv2.putText(img, 'THUMB UP', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 3)  # Menambahkan teks "FUCK" ke gambar.
-                # data = "THUMN UP\n" # isi data sesuai kondisi tangan
-                # ser.write(data.encode('utf-8')) # kirim data ke seria
+                cv2.putText(img, 'THUMB UP', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (3, 252, 23), 3)  # Menambahkan teks "FUCK" ke gambar.
+                data = "THUMB UP\n" # isi data sesuai kondisi tangan
+                ser.write(data.encode('utf-8')) # kirim data ke seria
 
-            # Jika tidak dalam kondisi apapun
- 
-                # data = "TIDAK TERDETEKSI\n"
-                # ser.write(data.encode('utf-8'))
-                # print(f'Data pose dikirim: {data}')
+            # Jika tidak periksa apakah tangan dalam pose "THUMB UP"
+            elif hand_pose.is_thumb_down():
+                cv2.putText(img, 'THUMB DOWN', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 3)  # Menambahkan teks "FUCK" ke gambar.
+                data = "THUMB DOWN\n" # isi data sesuai kondisi tangan
+                ser.write(data.encode('utf-8')) # kirim data ke seria
+            elif hand_pose.is_call_me():
+                cv2.putText(img, 'CALL ME', (10, 130), cv2.FONT_HERSHEY_PLAIN, 2, (3, 252, 23), 3)  # Menambahkan teks "FUCK" ke gambar.
+                data = "CALL ME\n" # isi data sesuai kondisi tangan
+                ser.write(data.encode('utf-8')) # kirim data ke seria
+            # Jika tidak dalam kondisi apapun atau unknown
+            else:
+                data = "UNKNOWN\n"
+                ser.write(data.encode('utf-8'))
 
-            # if ser.in_waiting > 0:
-            #     dataS = ser.readline().decode('utf-8').strip()
-            #     print(f'Data diterima: {dataS}')
+
+            # Baca data dari serial dan print
+            if ser.in_waiting > 0:
+                dataS = ser.readline().decode('utf-8').strip()
+                print(f'Data diterima: {dataS}')
 
 
     # Menghitung FPS
