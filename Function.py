@@ -45,7 +45,7 @@ class hands:
         # Konversi koordinat landmark jari kelingking pixel
         self.pinky_finger_tip_x, self.pinky_finger_tip_y = int(pinky_finger_tip.x * img_width), int(pinky_finger_tip.y * img_height)
         self.pinky_finger_pip_x, self.pinky_finger_pip_y = int(pinky_finger_pip.x * img_width), int(pinky_finger_pip.y * img_height)
-
+ 
 
     
     # function unutk menentukan memperhitungkan kodisi tangan berpose ok
